@@ -1,0 +1,99 @@
+# Red Team: Noir Edition – Entry 002
+
+> **Case File:** AlphaFin Internal Breach Simulation  
+> **Operator:** NoirSpecter  
+> **Objective:** Simulate an internal attacker targeting a fictional fintech company to achieve domain admin and access financial records using eJPT-level tools only.
+
+---
+
+## 🧠 Executive Summary
+This simulated internal penetration test targeted **AlphaFin**, a fictional fintech company. The assessment started from a compromised employee workstation (via phishing) and resulted in:
+
+- Full **Domain Admin** compromise
+- Access to sensitive financial records
+- Exploitation of weak credentials, misconfigurations, and lateral movement paths
+
+All attacks were executed using beginner-level tools aligned with the eJPT toolkit (e.g., Nmap, Hydra, Metasploit, Cadaver).
+
+---
+
+## 🗺️ Attack Flow Diagram
+
+![Attack Flow](images/attack-flow-entry002.png)
+
+---
+
+## 🧰 Tools Used
+- `Nmap` – Recon & Port Scanning
+- `Hydra` – Credential Brute Force
+- `Metasploit Framework` – Exploitation, Reverse Shells, Post-Exploitation
+- `Cadaver` – WebDAV File Upload
+- Native Windows/Linux command-line tools
+
+---
+
+## 🕵 Initial Access
+**Method:** Spear phishing email with a malicious macro payload  
+**Payload:** Meterpreter reverse shell (generated via `msfvenom`)  
+**Result:** Remote shell as standard domain user on workstation `AlphaFin-WKS-23`
+
+---
+
+## 🌐 Internal Reconnaissance
+**Tool:** Nmap + manual enumeration  
+**Findings:**
+- Web server (10.0.20.5) with `/webdav` directory (HTTP 401)
+- File server with SMB shares
+- Domain Controller (10.0.30.1)
+
+---
+
+## 📁 Exploitation: WebDAV Service
+**Vuln:** Weak credentials (`itadmin:Password123`) brute-forced via Hydra  
+**Action:** Uploaded PHP webshell via `cadaver` to `/webdav`  
+**Result:** Reverse shell access to internal web server
+
+---
+
+## 🔐 Privilege Escalation & Lateral Movement
+**On Web Server (Ubuntu):**
+- Privilege escalation via misconfigured `sudo` permissions
+- Extracted IT admin SSH key + cached Domain Admin creds
+
+**To Domain Controller:**
+- Used `psexec` with captured credentials to gain SYSTEM shell
+- Dumped domain hashes and confirmed Domain Admin access
+
+---
+
+## 🧾 Data Access
+**Target Data:**
+- `\\10.0.20.10\Finance_Data` share
+- SQL Server with `Transactions` table
+
+**Data Types:** Customer names, account numbers, credit card last4, transaction amounts  
+**Impact:** Demonstrated full access to AlphaFin’s financial crown jewels
+
+---
+
+## 🛡️ Recommendations (Abbreviated)
+- Enforce MFA for all admin accounts
+- Implement strict network segmentation
+- Patch internal services, especially WebDAV
+- Use strong, unique credentials for all accounts
+- Disable admin credential reuse & caching
+- Deploy internal monitoring & SIEM alerting
+
+---
+
+## 🧪 Lab Mapping (TryHackMe)
+To replicate parts of this scenario:
+- **"Dav"** – WebDAV exploitation
+- **"Blue"** / **"Ignite"** – Initial foothold via known vulnerabilities
+- **"Attacktive Directory"** – Post-exploitation in an AD environment
+
+---
+
+> **Signed:** NoirSpecter  
+> *Red Team: Noir Edition*  
+> *Entry 002 Complete*
