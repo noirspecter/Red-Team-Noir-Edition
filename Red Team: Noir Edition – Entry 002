@@ -17,12 +17,6 @@ All attacks were executed using beginner-level tools aligned with the eJPT toolk
 
 ---
 
-## 🗺️ Attack Flow Diagram
-
-![Attack Flow](images/attack-flow-entry002.png)
-
----
-
 ## 🧰 Tools Used
 - `Nmap` – Recon & Port Scanning
 - `Hydra` – Credential Brute Force
