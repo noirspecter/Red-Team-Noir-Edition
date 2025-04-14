@@ -1,0 +1,97 @@
+# Red Team: Noir Edition – Entry 003
+
+## 🎯 Engagement: Windows Exploit Lab – `target.ine.local`
+**Date:** 2025-04-14  
+**Operator:** NoirSpecter  
+**Support AI:** SpecterZero  
+**Platform:** Windows Server 2012 R2  
+**Objective:** Capture 4 flags through exploitation of Windows-based services using Metasploit and MSSQL access.
+
+---
+
+## 🧭 Phase 1: Reconnaissance
+
+**Tool:** `Nmap`  
+**Command:** `nmap -sC -sV target.ine.local`
+
+### Key Findings:
+- Port 1433 open: Microsoft SQL Server 2012 SP3
+- Ports 135, 139, 445: SMB and RPC exposed
+- Port 3389: RDP with SSL enabled
+- MSSQLSERVER identified with no password protection (auth success with `sa:`)
+- OS fingerprint: Windows Server 2012 R2 (Build 6.3.9600)
+
+---
+
+## 🧨 Phase 2: Initial Access
+
+**Tool:** Metasploit Framework  
+**Module Used:** `auxiliary/scanner/mssql/mssql_login`
+
+**Outcome:**
+- Authenticated as `sa` with blank password
+- Valid MSSQL session opened using Windows Auth
+- Created initial foothold on the system
+
+---
+
+## 🎮 Phase 3: Foothold Establishment
+
+**Tool:** Metasploit Framework  
+**Module Used:** `exploit/windows/mssql/mssql_clr_payload`
+
+**Outcome:**
+- Executed payload via MSSQL CLR to spawn a Meterpreter session
+- Shell established under context: `NT SERVICE\MSSQLSERVER`
+- Confirmed limited privileges
+
+---
+
+## 🔐 Phase 4: Privilege Escalation
+
+**Tool:** Metasploit Framework  
+**Command:** `getsystem`  
+**Technique:** Technique 5 – Named Pipe Impersonation (PrintSpooler Variant)
+
+**Outcome:**
+- Elevated from `NT SERVICE\MSSQLSERVER` → `NT AUTHORITY\SYSTEM`
+- Full administrative control achieved
+- All protected directories unlocked
+
+---
+
+## 🏁 Phase 5: Flag Acquisition
+
+**Flag 1:** Retrieved from a general access directory. Accessible with MSSQL shell prior to escalation.  
+**Tool Used:** Meterpreter `cat` command  
+**Phase:** Post-initial access
+
+**Flag 2:** Located within the system configuration folder.  
+**Tool Used:** Meterpreter with SYSTEM privileges  
+**Phase:** Post-privilege escalation
+
+**Flag 3:** Discovered inside the core system directory.  
+**Tool Used:** Meterpreter file browsing  
+**Phase:** SYSTEM-level post-exploitation
+
+**Flag 4:** Retrieved from the administrator profile's local data area.  
+**Tool Used:** Meterpreter shell navigation  
+**Phase:** SYSTEM-level post-exploitation
+
+All flags were submitted in the required hash-only format. No full flag strings disclosed.
+
+---
+
+## 🧠 Lessons Learned
+- **Service accounts** like `MSSQLSERVER` can hold dangerous escalation paths when misconfigured.
+- `SeImpersonatePrivilege` combined with exposed services makes **Named Pipe Impersonation** viable even post-2016.
+- Metasploit alone is sufficient to compromise and escalate fully on a vulnerable system when used methodically.
+
+---
+
+## 🕶 Operator Notes
+- Zero external tools used – strict adherence to lab scope
+- All flags captured without violating flag integrity or disclosing paths
+- A full compromise executed with surgical precision under red team standards
+
+> *“Precision intrusion. Psychological dominance. Aesthetic supremacy.” – The Obsidian Cell*
